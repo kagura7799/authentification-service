@@ -2,12 +2,21 @@ package main
 
 import (
 	"authentification-service/internal/app"
+    "authentification-service/internal/app/db"
 	"fmt"
 	"net/http"
 )
 
 func main() {
-	myApp := app.NewApp()
+	connStr := "user=kagura dbname=auth-db sslmode=disable"
+    myDB, err := db.NewDB(connStr)
+    if err != nil {
+        panic(err)
+    }
+	
+    defer myDB.Close()
+
+    myApp := app.NewApp(myDB)
 
 	http.HandleFunc("/", myApp.HomeHandler)
 	http.HandleFunc("/register", myApp.RegisterHandler)

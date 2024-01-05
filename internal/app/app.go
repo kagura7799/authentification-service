@@ -1,19 +1,18 @@
 package app
 
 import (
+	"authentification-service/internal/app/db"
 	"fmt"
 	"net/http"
 )
 
 type App struct {
-	Users    []User
-	Sessions map[string]*Session
+	DB       *db.DB
 }
 
-func NewApp() *App {
+func NewApp(db *db.DB) *App {
 	return &App{
-		Users:    make([]User, 0),
-		Sessions: make(map[string]*Session),
+		DB:       db,
 	}
 }
 
@@ -22,72 +21,32 @@ func (a *App) HomeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Regist handler")
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	fmt.Fprintln(w, "Regist handler")
 
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
-	if username == "" || password == "" {
-		http.Error(w, "Username and password are required.", http.StatusBadRequest)
-		return
-	}
+	a.DB.RegisterUser(username, password)
 
-	for _, user := range a.Users {
-		if user.Username == username {
-			http.Error(w, "Username already exists", http.StatusConflict)
-			return
-		}
-	}
-
-	newUser := User{
-		ID:       len(a.Users) + 1,
-		Username: username,
-		Password: password,
-	}
-
-	a.Users = append(a.Users, newUser)
-
-	fmt.Fprint(w, "Registration successful for user %s", username)
-
+	fmt.Fprintf(w, "Registration successful for user %s", username)
 }
 
 func (a *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprint(w, "Login handler")
-
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
+	fmt.Fprintln(w, "Login handler")
 
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+	
+	isAuth, err := a.DB.AuthenticateUser(username, password)
 
-	if username == "" || password == "" {
-		http.Error(w, "Username and password are required.", http.StatusBadRequest)
+	if isAuth {
+		fmt.Fprintf(w, "Login successful.")
+	} else {
+		fmt.Fprintf(w, "Error, incorrect username or password")
+	}
+
+	if err != nil {
+		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}
-
-	var foundUser User
-
-	for _, user := range a.Users {
-		if user.Username == username && user.Password == password {
-			foundUser = user
-			break
-		}
-	}
-
-	if foundUser.ID == 0 {
-		http.Error(w, "Invalid username or password", http.StatusUnauthorized)
-	}
-
-	token := fmt.Sprintf("token_%d", foundUser.ID)
-	session := &Session{UserID: foundUser.ID, Token: token}
-	a.Sessions[token] = session
-
-	fmt.Fprintf(w, "Login successful. Session token: %s", token)
 }
