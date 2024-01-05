@@ -7,13 +7,13 @@ import (
 	"net/http"
 )
 
+
 func main() {
-	connStr := "user=kagura dbname=auth-db sslmode=disable"
-    myDB, err := db.NewDB(connStr)
+    myDB, err := db.NewDB(db.ConnStr)
     if err != nil {
         panic(err)
     }
-	
+
     defer myDB.Close()
 
     myApp := app.NewApp(myDB)

@@ -26,6 +26,11 @@ func (a *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	username := r.FormValue("username")
 	password := r.FormValue("password")
 
+	if username == "" || password == "" {
+		http.Error(w, "Error, fields username and password are empty", http.StatusNoContent)
+		return
+	}
+
 	a.DB.RegisterUser(username, password)
 
 	fmt.Fprintf(w, "Registration successful for user %s", username)
@@ -36,6 +41,11 @@ func (a *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	username := r.FormValue("username")
 	password := r.FormValue("password")
+
+	if username == "" || password == "" {
+		http.Error(w, "Error, fields username and password are empty", http.StatusNoContent)
+		return
+	}
 	
 	isAuth, err := a.DB.AuthenticateUser(username, password)
 
@@ -43,9 +53,7 @@ func (a *App) LoginHandler(w http.ResponseWriter, r *http.Request) {
 		fmt.Fprintf(w, "Login successful.")
 	} else {
 		fmt.Fprintf(w, "Error, incorrect username or password")
-	}
-
-	if err != nil {
+		fmt.Println("Authentication error:", err)
 		http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 		return
 	}

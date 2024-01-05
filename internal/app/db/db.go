@@ -7,6 +7,8 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+const ConnStr string = "user=kagura dbname=auth-db sslmode=disable"
+
 type DB struct {
 	conn *sql.DB
 }
@@ -29,8 +31,7 @@ func (db *DB) Ping() error {
 }
 
 func UsageBD() {
-	connStr := "user=kagura dbname=auth-db sslmode=disable"
-	db, err := NewDB(connStr)
+	db, err := NewDB(ConnStr)
 	if err != nil {
 		panic(err)
 	}
@@ -81,7 +82,7 @@ func (db *DB) AuthenticateUser(username, password string) (bool, error) {
     err := db.conn.QueryRow("SELECT password FROM users WHERE username = $1", username).Scan(&hashedPassword)
     if err != nil {
         if err == sql.ErrNoRows {
-            return false, nil
+            return false, nil	
         }
         return false, err
     }
