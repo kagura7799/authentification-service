@@ -33,7 +33,7 @@ func (a *App) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	a.DB.RegisterUser(username, password)
 
-	fmt.Fprintf(w, "Registration successful for user %s", username)
+	fmt.Fprintln(w, "Registration successful")
 }
 
 func (a *App) LoginHandler(w http.ResponseWriter, r *http.Request) {

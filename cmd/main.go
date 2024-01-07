@@ -16,6 +16,8 @@ func main() {
 
     defer myDB.Close()
 
+	db.UsageBD()
+
     myApp := app.NewApp(myDB)
 
 	http.HandleFunc("/", myApp.HomeHandler)

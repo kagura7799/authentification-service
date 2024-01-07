@@ -7,7 +7,7 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-const ConnStr string = "user=kagura dbname=auth-db sslmode=disable"
+const ConnStr string = "user=kagura password=sandy_777 dbname=auth-db sslmode=disable"
 
 type DB struct {
 	conn *sql.DB
